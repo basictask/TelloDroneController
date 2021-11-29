@@ -4,6 +4,24 @@ Created on Mon Nov 29 10:21:23 2021
 
 This program will use pygame to control the drone
 
+Maintains the Tello display and moves it through the keyboard keys.
+Press escape key to quit.
+The controls are:
+    - T: Takeoff
+    - L: Land
+    - Arrow keys: Forward, backward, left and right.
+    - A and D: Counter clockwise and clockwise rotations (yaw)
+    - W and S: Up and down.
+    - P: take photo and save it to given image folder
+
+The purpose of a mission is to save images into a given folder with a given name so the main 
+program of the Tello drone controller can read it.
+The image name and directory will have to be recieved through the parameters. 
+Image file format is png
+
+For available Tello commands refer to tello.py --> methods inside class file
+
+
 @author: Daniel Kuknyo
 """
 
@@ -14,28 +32,15 @@ import numpy as np
 import time
 
 # Speed of the drone
-
-S = 60
+S = 30
 # Frames per second of the pygame window display
 # A low number also results in input lag, as input information is processed once per frame.
 # pygame
-FPS = 120
-
+FPS = 30
 
 class FrontEnd(object):
-    """ Maintains the Tello display and moves it through the keyboard keys.
-        Press escape key to quit.
-        The controls are:
-            - T: Takeoff
-            - L: Land
-            - Arrow keys: Forward, backward, left and right.
-            - A and D: Counter clockwise and clockwise rotations (yaw)
-            - W and S: Up and down.
-    """
-
     def __init__(self):
-        # Init pygame
-        pygame.init()
+        pygame.init() # Init pygame
 
         # Creat pygame window
         pygame.display.set_caption("Tello video stream")
@@ -57,12 +62,10 @@ class FrontEnd(object):
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)
 
     def run(self):
-
         self.tello.connect()
         self.tello.set_speed(self.speed)
 
-        # In case streaming is on. This happens when we quit this program without the escape key.
-        self.tello.streamoff()
+        self.tello.streamoff() # In case streaming is on.
         self.tello.streamon()
 
         frame_read = self.tello.get_frame_read()
@@ -126,7 +129,7 @@ class FrontEnd(object):
             self.yaw_velocity = -S
         elif key == pygame.K_d:  # set yaw clockwise velocity
             self.yaw_velocity = S
-        elif key == pygame.K_p:
+        elif key == pygame.K_p: # take a photo and save it into a given folder
             frame_img = self.tello.get_frame_read().frame
             frame_name = "frame" + str(self.image_counter)
             cv2.imwrite(frame_name, frame_img)
@@ -135,7 +138,7 @@ class FrontEnd(object):
     def keyup(self, key):
         """ Update velocities based on key released
         Arguments:
-            key: pygame key
+            key: pygame key -> Button pressed
         """
         if key == pygame.K_UP or key == pygame.K_DOWN:  # set zero forward/backward velocity
             self.for_back_velocity = 0
@@ -158,12 +161,10 @@ class FrontEnd(object):
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
 
-
 def main():
     frontend = FrontEnd()
     # run frontend
     frontend.run()
-
 
 if __name__ == '__main__':
     main()

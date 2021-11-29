@@ -43,6 +43,6 @@ def send_notifications(ids, text, photoname):
 #ids = ['923197636', '2140059741', '2132359615', '2144912667']
 ids = ['2140059741', '2144912667'] # This will contain the Telegram IDs to send messages to 
 text = 'Fire in the hole!' # What message should be sent
-photoname = '10978489_347502588794003_74380988232417238_n.jpg'
+photoname = 'frames/frame3.png'
 
 send_notifications(ids, text, photoname)
