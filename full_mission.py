@@ -15,33 +15,30 @@ If there's a fire showing up on any of the photos, the drone will send notificat
 Notification sending works by commanding a previously defined telegram bot controlled by HTTP requests. 
 For connection with wifi settings refer to wifitest.py
 
-TODO: add customizable mission to program e.g. mission library 
+Changelog:
+Added customizable mission to program e.g. mission library 
+New mission added: drone can be controlled with pygame
 """
 
 #%% Libraries used
-import pandas as pd
-import numpy as np
 import requests
 import cv2
 import os
-import math
-import time
 import winwifi
 import torch
 import torchvision
 from torchvision import transforms
-from djitellopy import Tello
 from Mission import do_mission
 
 rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/'
 directory = 'Images/'
-imgdir = rootdir + directory
 init_imname = 'frame'
+imgdir = rootdir + directory
 os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
 
 
 #%% Read model file into torchvision
-model = torch.load('ResNet18')
+model = torch.load('ResNet18', map_location=torch.device('cpu'))
 
 im_height = 224
 im_width = 224
@@ -68,27 +65,21 @@ def send_notifications(names, text, photoname):
         
 
 #%% Fly the drone and save the images
-do_mission(imgdir)
+# Params: directory, image fixed part (for saving), height (to fly up and down)
+# Images will be saved into imgdir Images folder. Torch imagefolder will read them from here
+do_mission(imgdir, init_imname, 30) 
 
-
-#%% Read images into file
-images = []
-fbase = directory + init_imname
-
-for i in range(4):
-    fname = fbase + str(i) + '.jpg'
-    img = cv2.imread(fname)
-    images.append(img)
-    
 
 #%% Iterate over the images using torchvision model 
 preds = {}
+images = []
 for filename in os.listdir(directory):
     f = os.path.join(directory, filename)
     if os.path.isfile(f):
         img = cv2.imread(f)
+        images.append(img)
         img_trans = img_transforms(img)
-        output = model(img)
+        output = model(img_trans)
         preds[f] = output
         
         
@@ -104,4 +95,3 @@ for key in preds.keys():
         text = 'No fire on this image'
         send_notifications(names, text, photoname)
         
-# End

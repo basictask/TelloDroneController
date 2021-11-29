@@ -19,7 +19,6 @@ S = 60
 # Frames per second of the pygame window display
 # A low number also results in input lag, as input information is processed once per frame.
 # pygame
-
 FPS = 120
 
 
@@ -51,8 +50,8 @@ class FrontEnd(object):
         self.up_down_velocity = 0
         self.yaw_velocity = 0
         self.speed = 10
-
         self.send_rc_control = False
+        self.image_counter = 0
 
         # create update timer
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)
@@ -110,9 +109,6 @@ class FrontEnd(object):
         """ Update velocities based on key pressed
         Arguments:
             key: pygame key
-        基于键的按下上传各个方向的速度
-        参数：
-            key：pygame事件循环中的键事件
         """
         if key == pygame.K_UP:  # set forward velocity
             self.for_back_velocity = S
@@ -130,14 +126,16 @@ class FrontEnd(object):
             self.yaw_velocity = -S
         elif key == pygame.K_d:  # set yaw clockwise velocity
             self.yaw_velocity = S
+        elif key == pygame.K_p:
+            frame_img = self.tello.get_frame_read().frame
+            frame_name = "frame" + str(self.image_counter)
+            cv2.imwrite(frame_name, frame_img)
+            self.image_counter += 1
 
     def keyup(self, key):
         """ Update velocities based on key released
         Arguments:
             key: pygame key
-        基于键的松开上传各个方向的速度
-        参数：
-            key：pygame事件循环中的键事件
         """
         if key == pygame.K_UP or key == pygame.K_DOWN:  # set zero forward/backward velocity
             self.for_back_velocity = 0
@@ -155,9 +153,7 @@ class FrontEnd(object):
             self.send_rc_control = False
 
     def update(self):
-        """ Update routine. Send velocities to Tello.
-            向Tello发送各方向速度信息
-        """
+        """ Update routine. Send velocities to Tello."""
         if self.send_rc_control:
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
@@ -165,9 +161,7 @@ class FrontEnd(object):
 
 def main():
     frontend = FrontEnd()
-
     # run frontend
-
     frontend.run()
 
 
