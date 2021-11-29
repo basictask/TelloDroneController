@@ -31,9 +31,12 @@ import torch
 import torchvision
 from torchvision import transforms
 from djitellopy import Tello
+from Mission import do_mission
 
 rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/'
-imgdir = rootdir + 'Images/'
+directory = 'Images/'
+imgdir = rootdir + directory
+init_imname = 'frame'
 os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
 
 
@@ -64,38 +67,15 @@ def send_notifications(names, text, photoname):
         print()
         
 
-#%% Estabilish connection###################################################### Mission start
-tello = Tello()
-tello.connect()
-init_imname = 'droneimg_'
+#%% Fly the drone and save the images
+do_mission(imgdir)
 
 
-#%% Turn on video
-tello.streamon()
-frame_read = tello.get_frame_read().frame
-cv2.imwrite(init_imname + "init", frame_read)
-
-
-#%% Complete the mission
-num_iter = 4
-tello.streamon()
-tello.takeoff()
-
-for i in range(num_iter):
-    time.sleep(20) # wait 10 seconds
-    image = tello.get_frame_read().frame
-    cv2.imwrite(init_imname + str(i), frame_read)
-    tello.rotate_counter_clockwise(90)
-
-tello.land()
-
-
-#%% Read images into file###################################################### Mission end
+#%% Read images into file
 images = []
-directory = 'Images/'
 fbase = directory + init_imname
 
-for i in range(num_iter):
+for i in range(4):
     fname = fbase + str(i) + '.jpg'
     img = cv2.imread(fname)
     images.append(img)
