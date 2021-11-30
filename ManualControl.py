@@ -2,6 +2,8 @@
 """
 Created on Mon Nov 29 10:21:23 2021
 
+@author: Daniel Kuknyo
+
 This program will use pygame to control the drone
 
 Maintains the Tello display and moves it through the keyboard keys.
@@ -17,12 +19,9 @@ The controls are:
 The purpose of a mission is to save images into a given folder with a given name so the main 
 program of the Tello drone controller can read it.
 The image name and directory will have to be recieved through the parameters. 
-Image file format is png
+Image file format is png.
 
 For available Tello commands refer to tello.py --> methods inside class file
-
-
-@author: Daniel Kuknyo
 """
 
 from tello import Tello

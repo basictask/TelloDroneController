@@ -4,7 +4,7 @@ Created on Sun Nov 21 14:21:53 2021
 
 @author: Daniel Kuknyo
 
-This is the program that handles the mission for the Tello drone.
+### This is the program that handles the mission and interactions for the Tello drone. ###
 
 ### Program description ###
 The program will read and load resnet into a torchvision model file, already pretrained on fire/nonfire pictures.
@@ -13,10 +13,12 @@ The drone will take off, take 4 pictures in each direction (forward, backward, l
 The leaded torchvision model evalates the pictures, depending if it's fire or not.
 If there's a fire showing up on any of the photos, the drone will send notification to a specified group of people.
 Notification sending works by commanding a previously defined telegram bot controlled by HTTP requests. 
+Important: the Telegram bot needs to be activated for the user. --> Verify by sending a message to Wedsbot
 For connection with wifi settings refer to wifitest.py
 
 Changelog:
 Added customizable mission to program e.g. mission library 
+Added switching between automatic and manual control modes
 New mission added: drone can be controlled with pygame
 """
 
@@ -32,7 +34,9 @@ from torchvision import transforms
 from Mission import do_mission
 from ManualControl import FrontEnd
 
-# Directories needed to run mission 
+# Directories and global variables needed to run mission # Configure them before running
+mission_mode = 'auto' # auto -> predefined path; manual -> manually controlling the drone from python interface
+model_name = 'ResNet18' # Which model to read from files
 rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/Images/' # Where the image folder is
 directory = 'frames/' # Image folder name
 init_imname = 'frame' # Image name fixed part: e.g. frame0.png, frame1.png etc...
@@ -42,7 +46,8 @@ os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
 
 #%% Read model file into torchvision
 print('Reading model file...')
-model = torch.load('ResNet18', map_location=torch.device('cpu'))
+
+model = torch.load(model_name, map_location=torch.device('cpu'))
 
 # Transformations needed for the model file 
 im_height = 224
@@ -54,12 +59,14 @@ img_transforms = transforms.Compose([transforms.ToTensor(),
 #%% This function will send notifications to a specified group
 # Below is every team member's name with the Telegram E-channel ID-s specified
 print('Getting Telegram definitions...')
-group = {'Alina': '923197636', 'Dani': '2140059741', 'Mariam': '2144912667', 'Sofien': '2132359615'}
+
+# A dict containing the team member name - ID associations
+group = {'Alina': '923197636', 'Dani': '2140059741', 'Mariam': '2144912667', 'Sofien': '2132359615'} 
 names = ['Dani', 'Mariam'] # This will contain the Telegram IDs to send messages to 
 text = 'Fire in the hole!' # What message should be sent
 
 def send_notifications(names, text, photoname):
-    token = "2127036493:AAFzTiQxgRNerbsNAD__4NqpWyumUttImL0"
+    token = "2127036493:AAFzTiQxgRNerbsNAD__4NqpWyumUttImL0" # Telegram API token -> Dani
     url = f"https://api.telegram.org/bot{token}" # Here comes the token from step 4
     ids = [group[x] for x in names]
     
@@ -75,32 +82,35 @@ def send_notifications(names, text, photoname):
         
 
 #%% Fly the drone and save the images
-# Params: directory, image fixed part (for saving), height (to fly up and down)
 # Images will be saved into imgdir Images folder. Torch imagefolder will read them from here
-##### Fly the drone in a manually programmed scenario
+# The purpose of the mission is to save the drone images into the folder recieved through the params
 print('Drone mission starting...')
-do_mission(imgdir, init_imname, 30) 
+
+if(mission_mode == 'auto'):
+    ##### Predefined mission course #####
+    # Params: directory, image fixed part (for saving), height (to fly up and down)
+    do_mission(imgdir, init_imname, 30) 
+    
+elif(mission_mode == 'manual'):
+    ##### Other possibility #####
+    # Uncomment part below to make it work
+    # This class will allow Tello to be controlled by a preson with the keyboard
+    ## Controls ##
+    # - T: Takeoff
+    # - L: Land
+    # - Arrow keys: Forward, backward, left and right.
+    # - A and D: Counter clockwise and clockwise rotations (yaw)
+    # - W and S: Up and down.
+    # - P: take photo and save it to given image folder
+    frontend = FrontEnd()
+    frontend.run()
+    
 print('Mission successful!')
-
-
-##### Other possibility #####
-# Uncomment part below to make it work
-# This class will allow Tello to be controlled by a preson with the keyboard
-##### Controls #####
-# - T: Takeoff
-# - L: Land
-# - Arrow keys: Forward, backward, left and right.
-# - A and D: Counter clockwise and clockwise rotations (yaw)
-# - W and S: Up and down.
-# - P: take photo and save it to given image folder
-
-# frontend = FrontEnd()
-# frontend.run()
-
 
 #%% Iterate over the images using torchvision model 
 # Read all the data saved by the mission into a datafolder
 print('Reading the images saved by the drone...')
+
 train_data = torchvision.datasets.ImageFolder(root=rootdir, transform=img_transforms)
 train_data_loader = torch.utils.data.DataLoader(train_data, batch_size=1)
 
@@ -117,6 +127,7 @@ for batch in train_data_loader: # Iterate over the loader and create a predictio
 
 #%% This step is needed to be able to send the notifications -> notif. problem occurs 
 # If not with this Wifi name, input any wifi network SSID that is saved by the laptop that's running the python interface
+print('Estabilishing connection to gateway...')
 winwifi.WinWiFi.connect('Kknet') # Connect to Wifi with gateway to internet        
         
 

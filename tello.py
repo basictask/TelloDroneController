@@ -1,4 +1,10 @@
-"""Library for interacting with DJI Ryze Tello drones.
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 15 17:14:59 2021
+
+@author: Daniel Kuknyo
+
+Library for interacting with DJI Ryze Tello drones.
 """
 
 # coding=utf-8
@@ -21,10 +27,14 @@ client_socket: socket.socket
 
 @enforce_types
 class Tello:
-    """Python wrapper to interact with the Ryze Tello drone using the official Tello api.
+    """
+    Python wrapper to interact with the Ryze Tello drone using the official Tello api.
+    
     Tello API documentation:
+    
     [1.3](https://dl-cdn.ryzerobotics.com/downloads/tello/20180910/Tello%20SDK%20Documentation%20EN_1.3.pdf),
     [2.0 with EDU-only commands](https://dl-cdn.ryzerobotics.com/downloads/Tello/Tello%20SDK%202.0%20User%20Guide.pdf)
+    
     """
     # Send and receive commands, client socket
     RESPONSE_TIMEOUT = 7  # in seconds
@@ -91,12 +101,9 @@ class Tello:
     stream_on = False
     is_flying = False
 
-    def __init__(self,
-                 host=TELLO_IP,
-                 retry_count=RETRY_COUNT):
-
+    def __init__(self, host=TELLO_IP, retry_count=RETRY_COUNT):
         global threads_initialized, client_socket, drones
-
+        
         self.address = (host, Tello.CONTROL_UDP_PORT)
         self.stream_on = False
         self.retry_count = retry_count

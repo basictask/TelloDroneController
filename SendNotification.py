@@ -3,6 +3,7 @@
 Created on Mon Nov 15 17:14:59 2021
 
 @author: Daniel Kuknyo
+
 This script will be the template to send a notification to a phone via the Telegram API
 
 STEPS TO TAKE BEFORE:
