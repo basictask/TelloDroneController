@@ -16,7 +16,7 @@ For available Tello commands refer to tello.py --> methods inside class file
 from djitellopy import Tello
 import cv2
 
-def do_mission(path, init_imname, height):
+def do_mission(path, init_imname, height, angle, num):
     tello = Tello()
     tello.connect()
     tello.streamon()
@@ -24,13 +24,13 @@ def do_mission(path, init_imname, height):
     
     tello.move_up(height)
     
-    for i in range(4):
+    for i in range(num):
         frame = tello.get_frame_read().frame
         framepth = path + init_imname + str(i) + ".png"
         cv2.imwrite(framepth, frame)
         print()
         print("Saving image: ", framepth)
-        tello.rotate_clockwise(90)
+        tello.rotate_clockwise(angle)
     
     tello.move_down(height)
     
