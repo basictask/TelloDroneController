@@ -14,7 +14,7 @@ The controls are:
     - Arrow keys: Forward, backward, left and right.
     - A and D: Counter clockwise and clockwise rotations (yaw)
     - W and S: Up and down.
-    - P: take photo and save it to given image folder
+    - P: take photo and save it to given image folder --> Program needs to recieve this as parameter!
 
 The purpose of a mission is to save images into a given folder with a given name so the main 
 program of the Tello drone controller can read it.
@@ -24,7 +24,8 @@ Image file format is png.
 For available Tello commands refer to tello.py --> methods inside class file
 """
 
-from tello import Tello
+from djitellopy import Tello
+from datetime import date
 import cv2
 import pygame
 import numpy as np
@@ -38,7 +39,7 @@ S = 30
 FPS = 30
 
 class FrontEnd(object):
-    def __init__(self):
+    def __init__(self, path, init_imname):
         pygame.init() # Init pygame
 
         # Creat pygame window
@@ -56,6 +57,8 @@ class FrontEnd(object):
         self.speed = 10
         self.send_rc_control = False
         self.image_counter = 0
+        self.path = path
+        self.init_imname = init_imname
 
         # create update timer
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)
@@ -130,7 +133,7 @@ class FrontEnd(object):
             self.yaw_velocity = S
         elif key == pygame.K_p: # take a photo and save it into a given folder
             frame_img = self.tello.get_frame_read().frame
-            frame_name = "frame" + str(self.image_counter)
+            frame_name = self.path + self.init_imname + str(self.image_counter) + ".png"
             cv2.imwrite(frame_name, frame_img)
             self.image_counter += 1
 
@@ -160,10 +163,17 @@ class FrontEnd(object):
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
 
-def main():
-    frontend = FrontEnd()
-    # run frontend
+def manual_misson(path, init_imname):
+    frontend = FrontEnd(path, init_imname)
     frontend.run()
 
 if __name__ == '__main__':
-    main()
+    # Set up variables
+    rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/Images/' # Where the image folder is
+    directory = 'frames/' # Image folder name
+    today = str(date.today())
+    init_imname = today + '_frame' # Image name fixed part: e.g. frame0.png, frame1.png etc...
+    imgdir = rootdir + directory
+    
+    # Run mission
+    manual_misson(path=imgdir, init_imname=init_imname)

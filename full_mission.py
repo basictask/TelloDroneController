@@ -16,31 +16,34 @@ Notification sending works by commanding a previously defined telegram bot contr
 Important: the Telegram bot needs to be activated for the user. --> Verify by sending a message to Wedsbot
 For connection with wifi settings refer to wifitest.py
 
-Changelog:
-Added customizable mission to program e.g. mission library 
-Added switching between automatic and manual control modes
-New mission added: drone can be controlled with pygame
+### Changelog ###
+Added customizable mission to program e.g. mission library. Now controllable by hyperparams.
+Added switching between automatic and manual control modes.
+New mission added: drone can be controlled with pygame.
+When mission is over the interface will connect to the net defined in params and send out notifications
 """
 
 #%% Libraries used
 print('Setting up dependecnies...')
 import requests
-import cv2
 import os
 import winwifi
 import torch
 import torchvision
+from datetime import date
 from torchvision import transforms
 from Mission import do_mission
-from ManualControl import FrontEnd
+from ManualControl import manual_misson
 
 # Directories and global variables needed to run mission # Configure them before running
 mission_mode = 'auto' # auto -> predefined path; manual -> manually controlling the drone from python interface
 model_name = 'ResNet18' # Which model to read from files
 rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/Images/' # Where the image folder is
 directory = 'frames/' # Image folder name
-init_imname = 'frame' # Image name fixed part: e.g. frame0.png, frame1.png etc...
+today = str(date.today())
+init_imname = today + '_frame' # Image name fixed part: e.g. frame0.png, frame1.png etc...
 imgdir = rootdir + directory # Images directory absolute path
+wifiname = 'Kknet'
 os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
 
 
@@ -61,7 +64,7 @@ img_transforms = transforms.Compose([transforms.ToTensor(),
 print('Getting Telegram definitions...')
 
 # A dict containing the team member name - ID associations
-group = {'Alina': '923197636', 'Dani': '2140059741', 'Mariam': '2144912667', 'Sofien': '2132359615'} 
+group = {'Alina': '923197636', 'Dani': '2140059741', 'Mariam': '2144912667', 'Sofien': '2132359615', 'Gellert': '2116813835'} 
 names = ['Dani', 'Mariam'] # This will contain the Telegram IDs to send messages to 
 text = 'Fire in the hole!' # What message should be sent
 
@@ -89,7 +92,7 @@ print('Drone mission starting...')
 if(mission_mode == 'auto'):
     ##### Predefined mission course #####
     # Params: directory, image fixed part (for saving), height (to fly up and down), angle (in degrees) to turn, number of times to turn
-    do_mission(imgdir, init_imname, 30, 90, 4) 
+    do_mission(path=imgdir, init_imname=init_imname, height=30, angle=90, num=4) 
     
 elif(mission_mode == 'manual'):
     ##### Other possibility #####
@@ -102,8 +105,7 @@ elif(mission_mode == 'manual'):
     # - A and D: Counter clockwise and clockwise rotations (yaw)
     # - W and S: Up and down.
     # - P: take photo and save it to given image folder
-    frontend = FrontEnd()
-    frontend.run()
+    manual_misson(path=imgdir, init_imname=init_imname)
     
 print('Mission successful!')
 
@@ -128,7 +130,8 @@ for batch in train_data_loader: # Iterate over the loader and create a predictio
 #%% This step is needed to be able to send the notifications -> notif. problem occurs 
 # If not with this Wifi name, input any wifi network SSID that is saved by the laptop that's running the python interface
 print('Estabilishing connection to gateway...')
-winwifi.WinWiFi.connect('Kknet') # Connect to Wifi with gateway to internet        
+
+winwifi.WinWiFi.connect(wifiname) # Connect to Wifi with gateway to internet        
         
 
 #%% Iterate over predictions to check if there's a fire
@@ -137,14 +140,15 @@ print('Successfully connected to gateway. Sending out notifications.')
 i = 0
 for filename in os.listdir(imgdir): # Iterate over the image directory
     pred = preds[i]
-    photoname = os.path.join(directory, filename)
-    if os.path.isfile(photoname):
-        if (pred): # There's a fire
-            text = 'Fire detected!'
-            send_notifications(names, text, photoname)
-        else: # No fire detected on given image
-            text = 'No fire on this image'
-            send_notifications(names, text, photoname)
-    i += 1
+    if(today in filename): # As photos are not getting deleted -> only reading images today
+        photoname = os.path.join(directory, filename)
+        if os.path.isfile(photoname):
+            if (pred): # There's a fire
+                text = 'Fire detected!'
+                send_notifications(names, text, photoname)
+            else: # No fire detected on given image
+                text = 'No fire on this image'
+                send_notifications(names, text, photoname)
+        i += 1
 
 print('City saved. Exiting.')

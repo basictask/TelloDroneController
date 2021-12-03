@@ -30,15 +30,18 @@ Mariam: 2144912667
 
 import requests
 
-def send_notifications(ids, text, photoname):
-    token = "2127036493:AAFzTiQxgRNerbsNAD__4NqpWyumUttImL0"
+def send_notifications(names, text, photoname):
+    token = "2127036493:AAFzTiQxgRNerbsNAD__4NqpWyumUttImL0" # Telegram API token -> Dani
     url = f"https://api.telegram.org/bot{token}" # Here comes the token from step 4
     
     for idx in ids: # Send the message to each of the IDs gotten through the params
+        print(photoname)    
         photo = {'photo': open(photoname, 'rb')} # Photo to attach to image    
         params = {"chat_id": idx, "text": text} # Here comes the token from step 3
-        r = requests.get(url + "/sendPhoto", params=params, files=photo)
-        print(r.status_code, r.reason, r.content)
+        rp = requests.get(url + "/sendPhoto", params=params, files=photo)
+        rm = requests.get(url + "/sendMessage", params=params)
+        print(rp.status_code, rp.reason, rp.content) # Send image 
+        print(rm.status_code, rm.reason, rm.content) # Send text message (Fire/no fire)
         print()
         
 #ids = ['923197636', '2140059741', '2132359615', '2144912667']
