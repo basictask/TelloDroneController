@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Nov 29 10:21:23 2021
-
 @author: Daniel Kuknyo
-
 This program will use pygame to control the drone
-
 Maintains the Tello display and moves it through the keyboard keys.
 Press escape key to quit.
 The controls are:
@@ -15,12 +12,10 @@ The controls are:
     - A and D: Counter clockwise and clockwise rotations (yaw)
     - W and S: Up and down.
     - P: take photo and save it to given image folder --> Program needs to recieve this as parameter!
-
 The purpose of a mission is to save images into a given folder with a given name so the main 
 program of the Tello drone controller can read it.
 The image name and directory will have to be recieved through the parameters. 
 Image file format is png.
-
 For available Tello commands refer to tello.py --> methods inside class file
 """
 
@@ -32,7 +27,7 @@ import numpy as np
 import time
 
 # Speed of the drone
-S = 30
+S = 40
 # Frames per second of the pygame window display
 # A low number also results in input lag, as input information is processed once per frame.
 # pygame

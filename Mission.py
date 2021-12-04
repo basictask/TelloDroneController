@@ -22,7 +22,7 @@ def do_mission(path, init_imname, height, angle, num):
     tello.streamon()
     tello.takeoff()
     
-    tello.move_up(height)
+    #tello.move_up(height)
     
     for i in range(num):
         frame = tello.get_frame_read().frame
@@ -30,16 +30,16 @@ def do_mission(path, init_imname, height, angle, num):
         cv2.imwrite(framepth, frame)
         print()
         print("Saving image: ", framepth)
-        tello.rotate_clockwise(angle)
+        tello.rotate_counter_clockwise(angle)
     
     tello.move_down(height)
     
     tello.land()
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/'
     directory = 'Images/'
     init_imname = 'frame'
     imgdir = rootdir + directory
-    do_mission(imgdir, init_imname, 30)
+    do_mission(imgdir, init_imname, 30, 90, 4)

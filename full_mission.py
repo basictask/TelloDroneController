@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov 21 14:21:53 2021
-
 @author: Daniel Kuknyo
-
 ### This is the program that handles the mission and interactions for the Tello drone. ###
-
 ### Program description ###
 The program will read and load resnet into a torchvision model file, already pretrained on fire/nonfire pictures.
 The program will connect to the drone using an UDP connection and a specific port reserved for this.
@@ -36,15 +33,16 @@ from Mission import do_mission
 from ManualControl import manual_misson
 
 # Directories and global variables needed to run mission # Configure them before running
-mission_mode = 'auto' # auto -> predefined path; manual -> manually controlling the drone from python interface
+rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/' # Where the image folder is
+imagefolderdir = rootdir + 'Images/' # For torchvision imagefolder
+imgdir = imagefolderdir + 'frames/' # Images directory absolute path
+os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
+
+mission_mode = 'manual' # auto -> predefined path; manual -> manually controlling the drone from python interface
 model_name = 'ResNet18' # Which model to read from files
-rootdir = 'C:/Users/Daniel Kuknyo/Documents/GitHub/TelloDroneController/Images/' # Where the image folder is
-directory = 'frames/' # Image folder name
 today = str(date.today())
 init_imname = today + '_frame' # Image name fixed part: e.g. frame0.png, frame1.png etc...
-imgdir = rootdir + directory # Images directory absolute path
 wifiname = 'Kknet'
-os.chdir(rootdir) # Can be any directory, but needs an Images subfolder
 
 
 #%% Read model file into torchvision
@@ -93,6 +91,7 @@ if(mission_mode == 'auto'):
     ##### Predefined mission course #####
     # Params: directory, image fixed part (for saving), height (to fly up and down), angle (in degrees) to turn, number of times to turn
     do_mission(path=imgdir, init_imname=init_imname, height=30, angle=90, num=4) 
+    print('Mission successful!')
     
 elif(mission_mode == 'manual'):
     ##### Other possibility #####
@@ -105,15 +104,19 @@ elif(mission_mode == 'manual'):
     # - A and D: Counter clockwise and clockwise rotations (yaw)
     # - W and S: Up and down.
     # - P: take photo and save it to given image folder
+    # - ESC: exit the mission and continue running the code <-- VERY IMPORTANT OTHERWISE PYGAME CRASHES
     manual_misson(path=imgdir, init_imname=init_imname)
-    
-print('Mission successful!')
+    print('Mission successful!')    
+
+else:
+    print('No mission defined')
+
 
 #%% Iterate over the images using torchvision model 
 # Read all the data saved by the mission into a datafolder
 print('Reading the images saved by the drone...')
 
-train_data = torchvision.datasets.ImageFolder(root=rootdir, transform=img_transforms)
+train_data = torchvision.datasets.ImageFolder(root=imagefolderdir, transform=img_transforms)
 train_data_loader = torch.utils.data.DataLoader(train_data, batch_size=1)
 
 print('Creating predictions...')
@@ -141,7 +144,7 @@ i = 0
 for filename in os.listdir(imgdir): # Iterate over the image directory
     pred = preds[i]
     if(today in filename): # As photos are not getting deleted -> only reading images today
-        photoname = os.path.join(directory, filename)
+        photoname = os.path.join(imgdir, filename)
         if os.path.isfile(photoname):
             if (pred): # There's a fire
                 text = 'Fire detected!'
