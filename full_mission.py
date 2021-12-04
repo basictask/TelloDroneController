@@ -90,7 +90,7 @@ print('Drone mission starting...')
 if(mission_mode == 'auto'):
     ##### Predefined mission course #####
     # Params: directory, image fixed part (for saving), height (to fly up and down), angle (in degrees) to turn, number of times to turn
-    do_mission(path=imgdir, init_imname=init_imname, height=30, angle=90, num=4) 
+    do_mission(path=imgdir, init_imname=init_imname, height=200, angle=90, num=4) 
     print('Mission successful!')
     
 elif(mission_mode == 'manual'):
