@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov 21 14:21:53 2021
-@author: Daniel Kuknyo
 ### This is the program that handles the mission and interactions for the Tello drone. ###
 ### Program description ###
 The program will read and load resnet into a torchvision model file, already pretrained on fire/nonfire pictures.
@@ -18,6 +17,11 @@ Added customizable mission to program e.g. mission library. Now controllable by 
 Added switching between automatic and manual control modes.
 New mission added: drone can be controlled with pygame.
 When mission is over the interface will connect to the net defined in params and send out notifications
+
+### To Do Before running code ###
+Create directory structure
+Add the 3 main code files and model file to it
+Customize hyperparams at the beginning of this file
 """
 
 #%% Libraries used
@@ -63,7 +67,7 @@ print('Getting Telegram definitions...')
 
 # A dict containing the team member name - ID associations
 group = {'Alina': '923197636', 'Dani': '2140059741', 'Mariam': '2144912667', 'Sofien': '2132359615', 'Gellert': '2116813835'} 
-names = ['Dani', 'Mariam'] # This will contain the Telegram IDs to send messages to 
+names = ['Sofien', 'Gellert', 'Dani'] # This will contain the Telegram IDs to send messages to 
 text = 'Fire in the hole!' # What message should be sent
 
 def send_notifications(names, text, photoname):
