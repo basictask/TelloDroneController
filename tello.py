@@ -2,9 +2,13 @@
 """
 Created on Mon Nov 15 17:14:59 2021
 
-@author: Daniel Kuknyo
-
 Library for interacting with DJI Ryze Tello drones.
+
+This class creates an object for Tello drones. 
+
+Note: This is not the actual class that's flying it, it's just a wrapper for Tello's commands! 
+      It's purpose is to make interacting with the drone easier! 
+      This object will be created in the code to fly the drone. 
 """
 
 # coding=utf-8
